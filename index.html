@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Card UID Validator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        .card {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        input {
+            padding: 0.5rem;
+            width: 100%;
+            margin-top: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .result {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>Encrypted UID Validator</h2>
+        <p>Enter scanned encrypted UID below:</p>
+        <input type="text" id="uidInput" placeholder="Enter encrypted UID here" />
+        <button onclick="checkAccess()">Check Access</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Secret key for AES encryption (must match what is used when encrypting the UID)
+        const secretKey = "my-secret-key";
+
+        // Pre-encrypted UIDs for validation
+        const users = [{
+            id: encrypt("72a90f1b91a3bc"),
+            name: "Aung Aung",
+            role: "Admin"
+        }, {
+            id: encrypt("adff12e49b2c01"),
+            name: "Ma Ma",
+            role: "Staff"
+        }, {
+            id: encrypt("9ce321a51cdeff"),
+            name: "Ko Ko",
+            role: "Visitor"
+        }];
+
+        // Function to encrypt a UID
+        function encrypt(uid) {
+            return CryptoJS.AES.encrypt(uid, secretKey).toString();
+        }
+
+        // Function to decrypt a UID
+        function decrypt(cipherText) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function checkAccess() {
+            const encryptedInput = document.getElementById("uidInput").value.trim();
+            const decryptedUID = decrypt(encryptedInput);
+            const resultDiv = document.getElementById("result");
+
+            if (!decryptedUID) {
+                resultDiv.style.color = "red";
+                resultDiv.textContent = "❌ Invalid or corrupted encrypted UID.";
+                return;
+            }
+
+            const match = users.find(u => decrypt(u.id) === decryptedUID);
+
+            if (match) {
+                resultDiv.style.color = "green";
+                resultDiv.textContent = `✅ Access Granted: ${match.name} (${match.role})`;
+            } else {
+                resultDiv.style.color = "red";
+                resultDiv.textContent = "❌ Access Denied: UID not recognized.";
+            }
+        }
+    </script>
+</body>
+
+</html>
