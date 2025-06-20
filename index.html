@@ -4,67 +4,83 @@
 <head>
     <meta charset="UTF-8" />
     <title>Card UID Validator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- CryptoJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <style>
         body {
-            font-family: Arial, sans-serif;
             background-color: #f2f2f2;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            padding: 1rem;
         }
         
-        .card {
-            background-color: #fff;
+        .custom-card {
+            width: 100%;
+            max-width: 500px;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
         }
         
-        input {
-            padding: 0.5rem;
-            width: 100%;
-            margin-top: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        .hidden {
+            display: none !important;
         }
         
-        button {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .info-label {
+            font-weight: 600;
+            color: #555;
         }
         
-        .result {
-            margin-top: 1rem;
-            font-weight: bold;
+        .info-value {
+            color: #333;
+        }
+        
+        @media (max-width: 576px) {
+            .custom-card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h2>Encrypted UID Validator</h2>
-        <p>Enter scanned encrypted UID below:</p>
-        <input type="text" id="uidInput" placeholder="Enter encrypted UID here" />
-        <button onclick="checkAccess()">Check Access</button>
-        <div class="result" id="result"></div>
+    <div class="container">
+        <!-- Input Form Card -->
+        <div class="card shadow custom-card mx-auto" id="inputCard">
+            <div class="card-body text-center">
+                <h4 class="card-title mb-3">🔒 Encrypted UID Validator</h4>
+                <p class="card-text">Enter scanned encrypted UID below:</p>
+                <input type="text" id="uidInput" class="form-control" placeholder="Enter encrypted UID here" />
+                <button onclick="checkAccess()" class="btn btn-success mt-3 w-100">Check Access</button>
+                <div id="result" class="mt-3 fw-bold"></div>
+            </div>
+        </div>
+
+        <!-- Result Card -->
+        <div class="card shadow custom-card mx-auto hidden" id="userCard">
+            <div class="card-body">
+                <h4 class="card-title text-center text-success mb-4">✅ Access Granted</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><span class="info-label">👤 Name:</span> <span id="userName" class="info-value"></span></li>
+                    <li class="list-group-item"><span class="info-label">🎯 Role:</span> <span id="userRole" class="info-value"></span></li>
+                    <li class="list-group-item"><span class="info-label">🏢 Company:</span> <span id="userCompany" class="info-value"></span></li>
+                    <li class="list-group-item"><span class="info-label">📍 Address:</span> <span id="userAddress" class="info-value"></span></li>
+                    <li class="list-group-item"><span class="info-label">📅 Age:</span> <span id="userAge" class="info-value"></span></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
         const secretKey = "my-secret-key";
 
-        // Define the encrypt function before it's used
         function encrypt(uid) {
             return CryptoJS.AES.encrypt(uid, secretKey).toString();
         }
@@ -78,11 +94,13 @@
             }
         }
 
-        // Now it's safe to use encrypt here
         const users = [{
             id: encrypt("72a90f1b91a3bc"),
-            name: "Aung Aung",
-            role: "Admin"
+            name: "Luminous",
+            role: "Junior Developer",
+            address: "Yangon",
+            Age: 24,
+            Company: "Axra Tech"
         }, {
             id: encrypt("adff12e49b2c01"),
             name: "Ma Ma",
@@ -107,15 +125,21 @@
             const match = users.find(u => decrypt(u.id) === decryptedUID);
 
             if (match) {
-                resultDiv.style.color = "green";
-                resultDiv.textContent = `✅ Access Granted: ${match.name} (${match.role})`;
+                document.getElementById("inputCard").classList.add("hidden");
+
+                document.getElementById("userName").textContent = match.name || "-";
+                document.getElementById("userRole").textContent = match.role || "-";
+                document.getElementById("userCompany").textContent = match.Company || "-";
+                document.getElementById("userAddress").textContent = match.address || "-";
+                document.getElementById("userAge").textContent = match.Age || "-";
+
+                document.getElementById("userCard").classList.remove("hidden");
             } else {
                 resultDiv.style.color = "red";
                 resultDiv.textContent = "❌ Access Denied: UID not recognized.";
             }
         }
 
-        // Auto-check from URL
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             const uid = params.get("uid");
