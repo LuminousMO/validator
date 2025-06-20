@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Card UID Validator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body {
@@ -38,7 +38,7 @@
         button {
             margin-top: 1rem;
             padding: 0.5rem 1rem;
-            background-color: #4CAF50;
+            background-color: #4caf50;
             color: white;
             border: none;
             border-radius: 5px;
@@ -116,6 +116,16 @@
                 resultDiv.textContent = "❌ Access Denied: UID not recognized.";
             }
         }
+
+        // On page load, check if URL has ?uid= parameter and auto-check
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const uid = params.get("uid");
+            if (uid) {
+                document.getElementById("uidInput").value = uid;
+                checkAccess();
+            }
+        };
     </script>
 </body>
 
