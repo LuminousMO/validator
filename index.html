@@ -62,10 +62,23 @@
     </div>
 
     <script>
-        // Secret key for AES encryption (must match what is used when encrypting the UID)
         const secretKey = "my-secret-key";
 
-        // Pre-encrypted UIDs for validation
+        // Define the encrypt function before it's used
+        function encrypt(uid) {
+            return CryptoJS.AES.encrypt(uid, secretKey).toString();
+        }
+
+        function decrypt(cipherText) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Now it's safe to use encrypt here
         const users = [{
             id: encrypt("72a90f1b91a3bc"),
             name: "Aung Aung",
@@ -79,21 +92,6 @@
             name: "Ko Ko",
             role: "Visitor"
         }];
-
-        // Function to encrypt a UID
-        function encrypt(uid) {
-            return CryptoJS.AES.encrypt(uid, secretKey).toString();
-        }
-
-        // Function to decrypt a UID
-        function decrypt(cipherText) {
-            try {
-                const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
-                return bytes.toString(CryptoJS.enc.Utf8);
-            } catch (e) {
-                return null;
-            }
-        }
 
         function checkAccess() {
             const encryptedInput = document.getElementById("uidInput").value.trim();
@@ -117,7 +115,7 @@
             }
         }
 
-        // On page load, check if URL has ?uid= parameter and auto-check
+        // Auto-check from URL
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             const uid = params.get("uid");
